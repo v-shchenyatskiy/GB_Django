@@ -1,0 +1,1 @@
+# GB Django geekshop project
