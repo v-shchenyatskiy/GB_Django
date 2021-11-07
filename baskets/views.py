@@ -11,17 +11,20 @@ from baskets.models import Basket
 
 @login_required
 def basket_add(request, product_id):
-    product = Product.objects.get(id=product_id)
-    baskets = Basket.objects.filter(user=request.user, product=product)
+    if request.is_ajax():
+        product = Product.objects.get(id=product_id)
+        baskets = Basket.objects.filter(user=request.user, product=product)
 
-    if not baskets.exists():
-        Basket.objects.create(user=request.user, product=product, quantity=1)
+        if not baskets.exists():
+            Basket.objects.create(user=request.user, product=product, quantity=1)
+        else:
+            basket = baskets.first()
+            basket.quantity += 1
+            basket.save()
+
+        return JsonResponse({'success': True})
     else:
-        basket = baskets.first()
-        basket.quantity += 1
-        basket.save()
-
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        return JsonResponse({'success': False})
 
 
 @login_required
