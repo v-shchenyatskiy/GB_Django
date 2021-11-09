@@ -1,4 +1,5 @@
 from django.shortcuts import render, HttpResponseRedirect
+from django.utils.decorators import method_decorator
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
 from django.views.generic.list import ListView
@@ -41,6 +42,10 @@ class UserCreateView(CreateView):
 class UserListView(ListView):
     model = User
     template_name = 'admins/admin-users-read.html'
+
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    def dispatch(self, request, *args, **kwargs):
+        return super(UserListView, self).dispatch(request, *args, **kwargs)
 
 
 # @user_passes_test(lambda u: u.is_staff)
