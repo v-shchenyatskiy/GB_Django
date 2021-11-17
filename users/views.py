@@ -1,7 +1,11 @@
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth, messages
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
+
+from users.models import User
+from django.views.generic.list import ListView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
 from baskets.models import Basket
@@ -27,17 +31,29 @@ def login(request):
     return render(request, 'users/login.html', context)
 
 
-def registration(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(data=request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Вы успешно зарегистрировались!')
-            return HttpResponseRedirect(reverse('users:login'))
-    else:
-        form = UserRegistrationForm()
-    context = {'title': 'GeekShop - Регистрация', 'form': form}
-    return render(request, 'users/registration.html', context)
+class RegistrationCreateView(CreateView):
+    model = User
+    form_class = UserRegistrationForm
+    success_url = reverse_lazy('users:login')
+    template_name = 'users/registration.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(RegistrationCreateView, self).get_context_data(**kwargs)
+        context['title'] = 'GeekShop - Регистрация'
+        return context
+
+
+# def registration(request):
+#     if request.method == 'POST':
+#         form = UserRegistrationForm(data=request.POST)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, 'Вы успешно зарегистрировались!')
+#             return HttpResponseRedirect(reverse('users:login'))
+#     else:
+#         form = UserRegistrationForm()
+#     context = {'title': 'GeekShop - Регистрация', 'form': form}
+#     return render(request, 'users/registration.html', context)
 
 
 @login_required
